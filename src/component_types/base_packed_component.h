@@ -9,7 +9,7 @@
 #define BASE_PACKED_COMPONENT_H_
 
 #include <assert.h>
-#include <gmpxx.h>
+#include <BigInt.hpp>
 #include <iostream>
 
 using namespace std;
@@ -145,20 +145,19 @@ public:
     return creation_time_;
   }
 
-  const mpz_class &model_count() const {
+  const BigInt &model_count() const {
     return model_count_;
   }
 
   unsigned alloc_of_model_count() const{
-        return sizeof(mpz_class)
-               + model_count_.get_mpz_t()->_mp_alloc * sizeof(mp_limb_t);
+        return sizeof(BigInt);
   }
 
   void set_creation_time(unsigned time) {
     creation_time_ = time;
   }
 
-  void set_model_count(const mpz_class &rn, unsigned time) {
+  void set_model_count(const BigInt &rn, unsigned time) {
     model_count_ = rn;
     length_solution_period_and_flags_ = (time - creation_time_) | (length_solution_period_and_flags_ & 1);
   }
@@ -211,7 +210,7 @@ protected:
 
   unsigned hashkey_ = 0;
 
-  mpz_class model_count_;
+  BigInt model_count_;
 
   unsigned creation_time_ = 1;
   unsigned hack_ = 0;

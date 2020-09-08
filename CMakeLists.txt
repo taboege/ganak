@@ -257,9 +257,6 @@ if (NOT WIN32)
     add_c_flag_if_supported("-mpclmul")
 endif()
 
-find_library(GMP_LIB gmp)
-find_library(GMPXX_LIB gmpxx)
-
 # -----------------------------------------------------------------------------
 # Add GIT version
 # -----------------------------------------------------------------------------
@@ -288,5 +285,20 @@ MESSAGE(STATUS "PROJECT_VERSION: ${PROJECT_VERSION}")
 MESSAGE(STATUS "PROJECT_VERSION_MAJOR: ${PROJECT_VERSION_MAJOR}")
 MESSAGE(STATUS "PROJECT_VERSION_MINOR: ${PROJECT_VERSION_MINOR}")
 MESSAGE(STATUS "PROJECT_VERSION_PATCH: ${PROJECT_VERSION_PATCH}")
+
+# Build BigInt header-only library.
+include(ExternalProject)
+set(BIGINT_SRC		${CMAKE_CURRENT_SOURCE_DIR}/BigInt)
+set(BIGINT_PREFIX	${CMAKE_CURRENT_BINARY_DIR}/BigInt)
+set(BIGINT_INC		${BIGINT_PREFIX}/)
+
+ExternalProject_Add(bigint
+	PREFIX ${BIGINT_PREFIX}
+	SOURCE_DIR ${BIGINT_SRC}
+	BUILD_COMMAND BIGINT_VERSION=0.1.b scripts/release.sh
+	BUILD_IN_SOURCE TRUE
+	INSTALL_COMMAND install -t <INSTALL_DIR>
+		${BIGINT_SRC}/release/BigInt.hpp
+)
 
 add_subdirectory(src)

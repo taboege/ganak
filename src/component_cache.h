@@ -11,7 +11,7 @@
 #include "component_types/cacheable_component.h"
 #include "statistics.h"
 #include "solver_config.h"
-#include <gmpxx.h>
+#include <BigInt.hpp>
 
 #include "component_types/component.h"
 
@@ -130,7 +130,7 @@ public:
 
 
   // store the number in model_count as the model count of CacheEntryID id
-  inline void storeValueOf(CacheEntryID id, const mpz_class &model_count);
+  inline void storeValueOf(CacheEntryID id, const BigInt &model_count);
 
   bool deleteEntries();
 

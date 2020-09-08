@@ -21,7 +21,7 @@
 
 #include <vector>
 #include <cmath>
-#include <gmpxx.h>
+#include <BigInt.hpp>
 #include "containers.h"
 #include "stack.h"
 

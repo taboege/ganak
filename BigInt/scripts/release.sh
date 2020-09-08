@@ -8,7 +8,7 @@ mkdir -p "$release_dir"
 # remove previous release file, if it exists
 rm -f "$release_file"
 
-read -p "Enter release version: " version
+#read -p "Enter release version: " version
 
 comment="\
 /*\n\
@@ -16,7 +16,7 @@ comment="\
     ------\n\
     Arbitrary-sized integer class for C++.\n\
     \n\
-    Version: $version\n\
+    Version: $BIGINT_VERSION\n\
     Released on: $(date +'%d %B %Y %R %Z')\n\
     Author: Syed Faheel Ahmad (faheel@live.in)\n\
     Project on GitHub: https://github.com/faheel/BigInt\n\
@@ -40,12 +40,26 @@ header_files="BigInt.hpp \
     operators/increment_decrement.hpp \
     operators/io_stream.hpp"
 
-# append the contents of each header file to the release file
+# First all #include's, then we open an anonymous namespace to
+# prevent multiple definition errors.
 for file in $header_files
 do
-    cat "include/$file" >> "$release_file"
+    cat "include/$file" | grep "^#include" >> "$release_file"
+done
+echo '#pragma GCC diagnostic push' >> "$release_file"
+echo '#pragma GCC diagnostic ignored "-Wunused-function"' >> "$release_file"
+echo 'namespace {' >> "$release_file"
+
+# append the contents of each header file to the release file,
+# except the #include's.
+for file in $header_files
+do
+    cat "include/$file" | grep -v "^#include" >> "$release_file"
     printf "\n\n" >> "$release_file"
 done
+
+echo '} /* namespace */' >> "$release_file"
+echo '#pragma GCC diagnostic pop' >> "$release_file"
 
 # delete includes for non-standard header files from the release file
 sed "/#include \"*\"/d" "$release_file" > "$release_file.tmp"

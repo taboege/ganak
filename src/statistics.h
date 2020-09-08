@@ -12,7 +12,7 @@
 #include <cstdint>
 #include <vector>
 
-#include <gmpxx.h>
+#include <BigInt.hpp>
 
 #include "structures.h"
 #include "component_types/cacheable_component.h"
@@ -163,7 +163,7 @@ public:
   unsigned long cache_MB_memory_usage() {
       return cache_bytes_memory_usage() / 1000000;
   }
-  mpz_class final_solution_count_ = 0;
+  BigInt final_solution_count_ = 0;
 
   double implicitBCP_miss_rate() {
       if(num_failed_literal_tests_ == 0) return 0.0;
@@ -180,22 +180,15 @@ public:
     return 10000 + 10 * times_conflict_clauses_cleaned_;
   }
 
-  void set_final_solution_count_projected(const mpz_class &count) {
-    mpz_mul_2exp(
-      final_solution_count_.get_mpz_t (),
-      count.get_mpz_t (),
-      num_free_projected_variables_);
+  void set_final_solution_count_projected(const BigInt &count) {
+    final_solution_count_ = count * pow(2LL, num_free_projected_variables_);
   }
 
-  void set_final_solution_count(const mpz_class &count) {
-    // set final_solution_count_ = count * 2^(num_variables_ - num_used_variables_)
-    mpz_mul_2exp(
-      final_solution_count_.get_mpz_t (),
-      count.get_mpz_t (),
-      num_variables_ - num_used_variables_);
+  void set_final_solution_count(const BigInt &count) {
+    final_solution_count_ = count * pow(2LL, num_variables_ - num_used_variables_);
   }
 
-  const mpz_class &final_solution_count() const {
+  const BigInt &final_solution_count() const {
     return final_solution_count_;
   }
 

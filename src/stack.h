@@ -8,7 +8,7 @@
 #ifndef STACK_H_
 #define STACK_H_
 
-#include <gmpxx.h>
+#include <BigInt.hpp>
 
 class StackLevel {
   /// active Component, once initialized, it should not change
@@ -20,7 +20,7 @@ class StackLevel {
   const unsigned literal_stack_ofs_ = 0;
 
   //  Solutioncount
-  mpz_class branch_model_count_[2] = {0,0};
+  BigInt branch_model_count_[2] = {0,0};
   bool branch_found_unsat_[2] = {false,false};
 
   /// remaining Components
@@ -92,7 +92,7 @@ public:
   unsigned literal_stack_ofs() {
     return literal_stack_ofs_;
   }
-  void includeSolution(const mpz_class &solutions) {
+  void includeSolution(const BigInt &solutions) {
     if (branch_found_unsat_[active_branch_]) {
       assert(branch_model_count_[active_branch_] == 0);
       return;
@@ -126,7 +126,7 @@ public:
     branch_found_unsat_[active_branch_] = true;
   }
 
-  const mpz_class getBranchSols() const {
+  const BigInt getBranchSols() const {
     return branch_model_count_[active_branch_];
   }
 
@@ -143,7 +143,7 @@ public:
 //	  branch_model_count_[0] = branch_model_count_[1] = 0;
 //	  active_branch_ = 1;
 //  }
-  const mpz_class getTotalModelCount() const {
+  const BigInt getTotalModelCount() const {
     return branch_model_count_[0] + branch_model_count_[1];
   }
 };

@@ -16,7 +16,7 @@
 // #include <vector>
 #include <unordered_map>
 #include <random>
-#include <gmpxx.h>
+#include <BigInt.hpp>
 #include "containers.h"
 #include "stack.h"
 #include "clhash/clhash.h"
@@ -44,7 +44,7 @@ public:
     return ana_.scoreOf(v);
   }
 
-  void cacheModelCountOf(unsigned stack_comp_id, const mpz_class &value)
+  void cacheModelCountOf(unsigned stack_comp_id, const BigInt &value)
   {
     if (config_.perform_component_caching)
       cache_.storeValueOf(component_stack_[stack_comp_id]->id(), value);

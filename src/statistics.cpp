@@ -13,7 +13,7 @@
 using namespace std;
 
 void DataAndStatistics::print_final_solution_count() {
-  cout << final_solution_count_.get_str();
+  cout << final_solution_count_.to_string();
 }
 
 void DataAndStatistics::writeToFile(const string & file_name, const bool pmc) {
@@ -70,7 +70,7 @@ void DataAndStatistics::writeToFile(const string & file_name, const bool pmc) {
   } else {
     out << "s mc " << std::flush;
   }
-  out << final_solution_count_.get_str();
+  out << final_solution_count_.to_string();
   out << endl;
   out << "c # END" << endl;
   out << "c " << endl;

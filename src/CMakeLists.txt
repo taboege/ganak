@@ -18,9 +18,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 
-include_directories( ${PROJECT_SOURCE_DIR} )
+#add_dependencies(ganak bigint)
+
+include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${BIGINT_INC})
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/GitSHA1.cpp.in" "${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp" @ONLY)
 
@@ -39,11 +42,10 @@ SET(SOURCES
 	${CMAKE_CURRENT_BINARY_DIR}/GitSHA1.cpp
 )
 
-SET(LIB	clhash
-		component_types)
+SET(LIB	clhash component_types)
 
 ADD_LIBRARY(ganak ${SOURCES} ${LIB})
-target_link_libraries (ganak ${LIB})
+target_link_libraries(ganak ${LIB})
 
 if (NOT WIN32)
     set_target_properties(ganak PROPERTIES
@@ -60,14 +62,9 @@ else()
     )
 endif()
 
-add_executable (ganak-bin
-    main.cpp
-)
+add_executable(ganak-bin main.cpp)
 
-target_link_libraries (ganak-bin
-ganak
-${GMP_LIB} ${GMPXX_LIB}
-)
+target_link_libraries(ganak-bin ganak)
 
 set_target_properties(ganak-bin PROPERTIES
     OUTPUT_NAME ganak
