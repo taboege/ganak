@@ -41,7 +41,7 @@ int main(int argc, char *argv[])
   Solver theSolver;
 
   cout << "c Outputting solution to console" << endl;
-  cout << "c GANAK version 1.0.0" << endl;
+  cout << "c GANAK version " << Ganak::get_version_tag() << endl;
 
   for (int i = 1; i < argc; i++) {
     if (strcmp(argv[i], "-help") == 0 || strcmp(argv[i], "-h") == 0) {
