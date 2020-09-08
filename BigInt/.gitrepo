@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = https://github.com/faheel/BigInt
+	branch = master
+	commit = 59f7cad13c4aa1ef6825b6853cb4e50b82c27f64
+	parent = 7f8445696f0b24b2ec64c85bc56a6e7c3c277310
+	method = merge
+	cmdver = 0.4.0
