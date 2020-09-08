@@ -74,3 +74,4 @@ set_target_properties(ganak-bin PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}
     INSTALL_RPATH_USE_LINK_PATH TRUE)
 
+install(TARGETS ganak-bin)
