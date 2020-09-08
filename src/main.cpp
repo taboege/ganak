@@ -12,17 +12,7 @@
 
 using namespace std;
 
-int main(int argc, char *argv[])
-{
-
-  string input_file;
-  Solver theSolver;
-
-  cout << "c Outputting solution to console" << endl;
-  cout << "c GANAK version 1.0.0" << endl;
-
-  if (argc <= 1)
-  {
+static void printUsage(void) {
     cout << "Usage: ganak [options] [CNF_File]" << endl;
     cout << "Options: " << endl;
     cout << "\t -noPP  \t\t turn off preprocessing" << endl;
@@ -42,11 +32,22 @@ int main(int argc, char *argv[])
     cout << "\t -noPMC\t\t\t turn off projected model counting " << endl;
     cout << "\t -maxdec [n] [m] \t terminate after n decision if conflict is less than m " << endl;
     cout << "\t" << endl;
-    return -1;
-  }
+}
+
+int main(int argc, char *argv[])
+{
+
+  string input_file = "-";
+  Solver theSolver;
+
+  cout << "c Outputting solution to console" << endl;
+  cout << "c GANAK version 1.0.0" << endl;
 
   for (int i = 1; i < argc; i++) {
-    if (strcmp(argv[i], "-noCC") == 0) {
+    if (strcmp(argv[i], "-help") == 0 || strcmp(argv[i], "-h") == 0) {
+       printUsage();
+       return -1;
+    } else if (strcmp(argv[i], "-noCC") == 0) {
       theSolver.config().perform_component_caching = false;
     } else if (strcmp(argv[i], "-noIBCP") == 0) {
       theSolver.config().perform_failed_lit_test = false;

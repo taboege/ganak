@@ -9,6 +9,8 @@
 
 #include <algorithm>
 #include <fstream>
+#include <sstream>
+#include <limits>
 #include <sys/stat.h>
 
 using namespace std;
@@ -263,45 +265,60 @@ bool Instance::markClauseDeleted(ClauseOfs cl_ofs){
   return true;
 }
 
+static inline bool starts_with(const string& a, const string& b) {
+  return a.rfind(b, 0) == 0;
+}
 
-void Instance::parseProjection(bool pcnf, ifstream& input_file, char& c) {
-  string idstring;
+bool Instance::parseProjection(bool pcnf, const string& line) {
   int lit;
-  char eolchar;
   //Parse old projection
-  if (c == 'c' && input_file.get(eolchar) && eolchar == '\n') {
-    input_file.unget();
-    return;
-  }
-  input_file.unget();
-  if (c == 'c' &&
-      input_file >> idstring &&
-      idstring == "ind") {
-    while ((input_file >> lit) && lit != 0) {
+  if (starts_with(line, "c ind")) {
+    stringstream ss(line.substr(6), ios_base::in);
+    while ((ss >> lit) && lit != 0) {
       if (!pcnf) {
         independent_support_.insert(lit);
       }
     }
+    return true;
   }
 
   //Parse new projection
-  if (c == 'v') {
-    input_file.unget();
-    input_file >> idstring;
+  if (starts_with(line, "v")) {
     if (pcnf) {
-      assert(idstring == "vp");
-      while ((input_file >> lit) && lit != 0) {
+      assert(starts_with(line, "vp"));
+      stringstream ss(line.substr(3), ios_base::in);
+      while ((ss >> lit) && lit != 0) {
         independent_support_.insert(lit);
       }
+      return true;
     }
   }
+
+  return false;
 }
 
 bool Instance::createfromFile(const string &file_name) {
+  bool res;
+  if (file_name == "-") {
+    res = createfromStream(cin);
+  }
+  else {
+    ifstream input_file(file_name);
+    if (!input_file) {
+      cerr << "Cannot open file: " << file_name << endl;
+      exit(0);
+    }
+    res = createfromStream(input_file);
+    input_file.close();
+  }
+  return res;
+}
+
+bool Instance::createfromStream(istream &input_file) {
   // Number of variable, clauses and projected variables.
   unsigned int nVars, nCls, nPVars;
   int lit;
-  unsigned max_ignore = 1000000;
+  auto max_ignore = numeric_limits<streamsize>::max();
   unsigned clauses_added = 0;
   LiteralID llit;
   vector<LiteralID> literals;
@@ -316,15 +333,6 @@ bool Instance::createfromFile(const string &file_name) {
   variables_.push_back(Variable()); //initializing the Sentinel
   literal_values_.clear();
   unit_clauses_.clear();
-
-  ifstream input_file(file_name);
-  if (!input_file) {
-    cerr << "Cannot open file: " << file_name << endl;
-    exit(0);
-  }
-
-  struct stat filestatus;
-  stat(file_name.c_str(), &filestatus);
 
   literals.reserve(10000);
   while (input_file >> c){
@@ -373,7 +381,9 @@ bool Instance::createfromFile(const string &file_name) {
 
   variables_.resize(nVars + 1);
   literal_values_.resize(nVars + 1, X_TRI);
-  literal_pool_.reserve(filestatus.st_size);
+  //struct stat filestatus;
+  //stat(file_name.c_str(), &filestatus);
+  //literal_pool_.reserve(filestatus.st_size);
   conflict_clauses_.reserve(2*nCls);
   occurrence_lists_.clear();
   occurrence_lists_.resize(nVars + 1);
@@ -381,50 +391,52 @@ bool Instance::createfromFile(const string &file_name) {
   literals_.clear();
   literals_.resize(nVars + 1);
 
-  while ((input_file >> c) && clauses_added < nCls) {
-    parseProjection(pcnf, input_file, c);
+  string line;
+  while (getline(input_file, line) && clauses_added < nCls) {
+    if (not line.length() || starts_with(line, "c "))
+      continue;
+
+    if (parseProjection(pcnf, line))
+      continue;
 
     //Parse clause
-    if ((c == '-') || isdigit(c)) {
-      input_file.unget(); //extracted a nonspace character to determine if we have a clause, so put it back
-      literals.clear();
-      bool skip_clause = false;
-      while ((input_file >> lit) && lit != 0) {
-        bool duplicate_literal = false;
-        for (auto i : literals) {
-          if (i.toInt() == lit) {
-            duplicate_literal = true;
-            break;
-          }
-          if (i.toInt() == -lit) {
-            skip_clause = true;
-            break;
-          }
+    stringstream ss(line, ios_base::in);
+    literals.clear();
+    bool skip_clause = false;
+    while (!ss.eof()) {
+      ss >> lit;
+      if (!lit)
+          break;
+      bool duplicate_literal = false;
+      for (auto i : literals) {
+        if (i.toInt() == lit) {
+          duplicate_literal = true;
+          break;
         }
-        if (!duplicate_literal) {
-          literals.push_back(lit);
+        if (i.toInt() == -lit) {
+          skip_clause = true;
+          break;
         }
       }
-      if (!skip_clause) {
-        assert(!literals.empty());
-        clauses_added++;
-        statistics_.incorporateClauseData(literals);
-        ClauseOfs cl_ofs = addClause(literals);
-        if (literals.size() >= 3)
-          for (auto l : literals)
-            occurrence_lists_[l].push_back(cl_ofs);
+      if (!duplicate_literal) {
+        literals.push_back(lit);
       }
     }
-    input_file.ignore(max_ignore, '\n');
+    if (!skip_clause) {
+      assert(!literals.empty());
+      clauses_added++;
+      statistics_.incorporateClauseData(literals);
+      ClauseOfs cl_ofs = addClause(literals);
+      if (literals.size() >= 3)
+        for (auto l : literals)
+          occurrence_lists_[l].push_back(cl_ofs);
+    }
   }
-  input_file.unget();
 
-  while (input_file >> c){
-    parseProjection(pcnf, input_file, c);
+  while (getline(input_file, line)) {
+    parseProjection(pcnf, line);
   }
 
-
-  input_file.close();
   //  /// END FILE input
 
   statistics_.num_variables_ = statistics_.num_original_variables_ = nVars;

@@ -78,7 +78,8 @@ protected:
   }
 
   bool createfromFile(const string &file_name);
-  void parseProjection(bool pcnf, ifstream& input_file, char& c);
+  bool createfromStream(istream &input_file);
+  bool parseProjection(bool pcnf, const string& line);
   DataAndStatistics statistics_;
 
   /** literal_pool_: the literals of all clauses are stored here
