@@ -500,7 +500,7 @@ void Solver::decideLiteral() {
   }
   assert(
       stack_.top().remaining_components_ofs() <= comp_manager_.component_stack_size());
-  if (stack_.get_decision_level() > statistics_.max_decision_level_) {
+  if ((long unsigned int) stack_.get_decision_level() > statistics_.max_decision_level_) {
     statistics_.max_decision_level_ = stack_.get_decision_level();
     if (statistics_.max_decision_level_ % 25 == 0) {
       cout << "c Max decision level :" << statistics_.max_decision_level_ << endl;

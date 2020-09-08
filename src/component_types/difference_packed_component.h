@@ -92,7 +92,7 @@ public:
       return false;
     }
     bool match = true;
-    for (int i=0; i<hack_;i++){
+    for (unsigned int i=0; i<hack_;i++){
       match = clhash_key[i] == clhashkey_[i];
       if(!match){
         return false;
@@ -249,9 +249,9 @@ DifferencePackedComponent::DifferencePackedComponent(vector<void *> &random,Comp
   bs.assert_size(data_size);
 
   clhashkey_ = new uint64_t[random.capacity()];
-  for(int i=0; i<random.capacity();i++){
+  for(unsigned int i=0; i<random.capacity();i++){
     clhasher h(random[i]);
-    clhashkey_[i] = h((void*)data_, sizeof(unsigned)*data_size);
+    clhashkey_[i] = h((unsigned char*)data_, sizeof(unsigned)*data_size);
   }
   //TODO Remove
   // delete[] data_;

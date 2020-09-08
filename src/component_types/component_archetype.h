@@ -219,9 +219,9 @@ private:
 
 
 
-void ComponentArchetype::createComponents(Component &ret_comp,
-      CacheableComponent ret_cache_comp,
-      unsigned stack_size){
+void ComponentArchetype::createComponents([[maybe_unused]] Component &ret_comp,
+      [[maybe_unused]] CacheableComponent ret_cache_comp,
+      [[maybe_unused]] unsigned stack_size){
 
 //      ret_comp.reserveSpace(stack_size, super_comp().numLongClauses());
 //      current_comp_for_caching_.clear();
