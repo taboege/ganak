@@ -379,21 +379,19 @@ bool Instance::createfromStream(istream &input_file) {
     }
   }
 
+  unsigned maxvar = 0;
   variables_.resize(nVars + 1);
   literal_values_.resize(nVars + 1, X_TRI);
-  //struct stat filestatus;
-  //stat(file_name.c_str(), &filestatus);
-  //literal_pool_.reserve(filestatus.st_size);
-  conflict_clauses_.reserve(2*nCls);
+  literal_pool_.reserve(3*nVars);
+
   occurrence_lists_.clear();
   occurrence_lists_.resize(nVars + 1);
-
   literals_.clear();
   literals_.resize(nVars + 1);
 
   string line;
-  while (getline(input_file, line) && clauses_added < nCls) {
-    if (not line.length() || starts_with(line, "c "))
+  while (getline(input_file, line)) {
+    if (!line.length() || starts_with(line, "c "))
       continue;
 
     if (parseProjection(pcnf, line))
@@ -407,6 +405,8 @@ bool Instance::createfromStream(istream &input_file) {
       ss >> lit;
       if (!lit)
           break;
+      unsigned v = lit < 0 ? -lit : lit;
+      maxvar = maxvar > v ? maxvar : v;
       bool duplicate_literal = false;
       for (auto i : literals) {
         if (i.toInt() == lit) {
@@ -418,26 +418,34 @@ bool Instance::createfromStream(istream &input_file) {
           break;
         }
       }
-      if (!duplicate_literal) {
+      if (!duplicate_literal)
         literals.push_back(lit);
-      }
     }
     if (!skip_clause) {
       assert(!literals.empty());
-      clauses_added++;
+      if (nVars == 0) {
+        variables_.resize(maxvar + 1);
+        literal_values_.resize(maxvar + 1, X_TRI);
+        literals_.resize(maxvar + 1);
+        occurrence_lists_.resize(maxvar + 1);
+      }
       statistics_.incorporateClauseData(literals);
       ClauseOfs cl_ofs = addClause(literals);
+      clauses_added++;
       if (literals.size() >= 3)
         for (auto l : literals)
           occurrence_lists_[l].push_back(cl_ofs);
     }
   }
 
-  while (getline(input_file, line)) {
-    parseProjection(pcnf, line);
-  }
-
   //  /// END FILE input
+
+  if (nVars == 0)
+    nVars = maxvar;
+  if (nCls == 0)
+    nCls = clauses_added;
+
+  conflict_clauses_.reserve(2*nCls);
 
   statistics_.num_variables_ = statistics_.num_original_variables_ = nVars;
   statistics_.num_used_variables_ = num_variables();
