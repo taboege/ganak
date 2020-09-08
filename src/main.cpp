@@ -47,6 +47,8 @@ int main(int argc, char *argv[])
     if (strcmp(argv[i], "-help") == 0 || strcmp(argv[i], "-h") == 0) {
        printUsage();
        return -1;
+    } else if (strcmp(argv[i], "-V") == 0) {
+      return 0; /* already printed it */
     } else if (strcmp(argv[i], "-noCC") == 0) {
       theSolver.config().perform_component_caching = false;
     } else if (strcmp(argv[i], "-noIBCP") == 0) {
